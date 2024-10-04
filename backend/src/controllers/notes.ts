@@ -40,23 +40,34 @@ export const getNote: RequestHandler = async (req, res, next) => {
 };
 //what is included in the note -- might need to change 
 interface CreateNoteBody {
-    title?: string,
-    text?: string,
+    firstName?: string,
+    lastName?: string,
+    email?: string,
+    description?: string,
 }
 
 export const createNote: RequestHandler<unknown, unknown, CreateNoteBody, unknown> = async (req, res, next) => {
-    const title = req.body.title;
-    const text = req.body.text;
+    const firstName = req.body.firstName;
+    const lastName = req.body.lastName;
+    const email = req.body.email;
+    const description = req.body.description;
 
     try {
-        //if there is no title throw an error
-        if(!title){
-            throw createHttpError(400, "Note must have a title")
+        //if there is no first and last name throw an error
+        if(!firstName || !lastName){
+            throw createHttpError(400, "Visitor must have a first and last name");
         }
-        //create a new note with a title and text
+        //if there is no email
+        if(!email) {
+            throw createHttpError(400, "Visitor must have and email");
+        }
+
+        //create a new note with the correct feilds
         const newNote = await NoteModel.create({
-            title: title,
-            text: text,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            description: description,
         });
         //send a success response
         res.status(201).json(newNote);
@@ -70,15 +81,19 @@ interface UpdateNoteParams {
 }
 //both optional since they might not change anything
 interface UpdateNoteBody{
-    title?: string,
-    text?: string,
+    firstName?: string,
+    lastName?: string,
+    email?: string,
+    description?: string,
 }
 
 //update an entity that has already been created
 export const updateNote: RequestHandler<UpdateNoteParams, unknown, UpdateNoteBody, unknown> = async(req, res, next) => {
     const noteId = req.params.noteId;
-    const newTitle = req.body.title;
-    const newText = req.body.text;
+    const newFirstName = req.body.firstName;
+    const newLastName = req.body.lastName;
+    const newEmail = req.body.email;
+    const newDescription = req.body.description;
 
     try {
         //if the noteId does not exist in the database then throw error
@@ -86,8 +101,12 @@ export const updateNote: RequestHandler<UpdateNoteParams, unknown, UpdateNoteBod
             throw createHttpError(400, "Invalid noteId");
         }
         //check for a new title
-        if(!newTitle){
-            throw createHttpError(400, "Note must have a title")
+        if(!newFirstName || !newLastName){
+            throw createHttpError(400, "Visitor must have a first and last name");
+        }
+        //if there is no email
+        if(!newEmail) {
+            throw createHttpError(400, "Visitor must have and email");
         }
         //now that we know the note exists in the data base find it using ID
         const note = await NoteModel.findById(noteId).exec();
@@ -95,9 +114,11 @@ export const updateNote: RequestHandler<UpdateNoteParams, unknown, UpdateNoteBod
         if(!note){
             throw createHttpError(404, "Note not found");
         }
-        //change the values of the title and the text to the new ones
-        note.title = newTitle;
-        note.text = newText;
+        //change the values to the new ones
+        note.firstName = newFirstName;
+        note.lastName = newLastName;
+        note.email = newEmail;
+        note.description = newDescription;
         //save the updated note to the database
         const updatedNote = await note.save();
         //send a success response

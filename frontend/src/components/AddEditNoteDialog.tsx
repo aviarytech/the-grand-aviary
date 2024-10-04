@@ -14,8 +14,10 @@ const AddNoteDialog = ({noteToEdit, onDismiss, onNoteSaved}: AddEditNoteDialogPr
 
     const {register, handleSubmit, formState: {errors, isSubmitting} } = useForm<NoteInput>({
         defaultValues: {
-            title: noteToEdit?.title ||  "",
-            text: noteToEdit?.text || "",
+            firstName: noteToEdit?.firstName || "",
+            lastName: noteToEdit?.lastName || "",
+            email: noteToEdit?.email || "",
+            description: noteToEdit?.description || "",
         }
     });
 
@@ -25,17 +27,17 @@ const AddNoteDialog = ({noteToEdit, onDismiss, onNoteSaved}: AddEditNoteDialogPr
             if (noteToEdit) {
                 noteResponse = await NoteApi.UpdateNote(noteToEdit._id, input);
             }else {
-                noteResponse = await NoteApi.createNote( input);
+                noteResponse = await NoteApi.createNote(input);
             }
             onNoteSaved(noteResponse);
         } catch (error) {
             console.error(error);
-            alert(error);
+            // You could show a user-friendly error message here
+            alert("An error occurred while saving the note. Please try again.");
         }
     }
 
-    return ( 
-        //Add the image if we want it in the Modal.Body Section, CTRL-F if you can't find
+    return (
         <Modal show onHide={onDismiss}>
             <ModalHeader closeButton>
                 <ModalTitle>
@@ -45,40 +47,70 @@ const AddNoteDialog = ({noteToEdit, onDismiss, onNoteSaved}: AddEditNoteDialogPr
             <Modal.Body>
                 <Form id="addEditNoteForm" onSubmit={handleSubmit(onSubmit)}>
                     <Form.Group className="mb-3">
-                        <Form.Label>Title</Form.Label>
-                        <Form.Control 
+                        <Form.Label>First Name</Form.Label>
+                        <Form.Control
                             type="text"
-                            placeholder="Title"
-                            isInvalid={!!errors.title}
-                            {...register("title", { required: "Required"})}
+                            placeholder="First Name"
+                            isInvalid={!!errors.firstName}
+                            {...register("firstName", { required: "First name is required"})}
                         />
                         <Form.Control.Feedback type="invalid">
-                            {errors.title?.message}
+                            {errors.firstName?.message}
                         </Form.Control.Feedback>
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Text</Form.Label>
+                        <Form.Label>Last Name</Form.Label>
+                        <Form.Control
+                            type="text"
+                            placeholder="Last Name"
+                            isInvalid={!!errors.lastName}
+                            {...register("lastName", { required: "Last name is required"})}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                            {errors.lastName?.message}
+                        </Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label>Email</Form.Label>
+                        <Form.Control
+                            type="email"
+                            placeholder="Email"
+                            isInvalid={!!errors.email}
+                            {...register("email", { 
+                                required: "Email is required",
+                                pattern: {
+                                    value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/i,
+                                    message: "Invalid email address"
+                                }
+                            })}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                            {errors.email?.message}
+                        </Form.Control.Feedback>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label>Description</Form.Label>
                         <Form.Control
                             as="textarea"
                             rows={5}
-                            placeholder="Text"
-                            {...register("text")}
+                            placeholder="Description"
+                            {...register("description")}
                         />
                     </Form.Group>
+
+                    <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                    >
+                        Save
+                    </Button>
                 </Form>
             </Modal.Body>
-            <Modal.Footer>
-                <Button
-                type="submit"
-                form="addEditNoteForm"
-                disabled={isSubmitting}
-                >
-                    Save
-                </Button>
-            </Modal.Footer>
         </Modal>
-     );
+    );
 }
- 
+
 export default AddNoteDialog;

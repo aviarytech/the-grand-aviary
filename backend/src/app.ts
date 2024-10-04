@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express, { Request, Response, NextFunction } from "express";
 import notesRoutes from "./routes/notes";
+import locationsRoutes from "./routes/locations";
 import morgan from "morgan";//logs HTTP requests and errors
 import createHttpError, { isHttpError } from "http-errors";
 
@@ -11,7 +12,9 @@ app.use(morgan("dev"));
 
 app.use(express.json());
 
+
 app.use("/api/notes", notesRoutes);
+app.use("/api/locations", locationsRoutes);
 
 //error message middleware
 app.use((req, res, next) => {

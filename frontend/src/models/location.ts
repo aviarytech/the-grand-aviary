@@ -1,9 +1,9 @@
 //This might need changing with the final copy with the actual fields
-export interface Note {
+export interface Location {
     _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
+    address: string;
+    latitude: number;
+    longitude: number;
     description?: string;
     createdAt: string;
     updatedAt: string;

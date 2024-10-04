@@ -15,8 +15,10 @@ interface NoteProps {
 
 const Note = ({note, onNoteClicked, onDeleteNoteClicked, className} : NoteProps) => {
     const {
-        title,
-        text,
+        firstName,
+        lastName,
+        email,
+        description,
         createdAt,
         updatedAt
     } = note;
@@ -27,13 +29,13 @@ const Note = ({note, onNoteClicked, onDeleteNoteClicked, className} : NoteProps)
     }else{
         createdUpdateText = "Created: " + formatDate(createdAt);
     }
-
+//<Card.Img variant="top" src="holder.js/100px180?text=Image cap" /> <-- code to make the image once ready
     return (
-        <Card className={`${styles.noteCard} ${className}`}
-        onClick={() => onNoteClicked(note)}>
+        <Card className={`${styles.noteCard} ${className}`} onClick={() => onNoteClicked(note)}>
             <Card.Body className={styles.cardBody}> 
+            
                 <Card.Title className={stylesUtils.flexCenter}>
-                    {title}
+                    {firstName}
                     <MdDelete 
                     className="text-muted ms-auto"
                     onClick={(e) => {
@@ -42,14 +44,17 @@ const Note = ({note, onNoteClicked, onDeleteNoteClicked, className} : NoteProps)
                     }}
                     />
                 </Card.Title>
+                <Card.Subtitle className="mb-2 text-muted">{lastName}</Card.Subtitle>
+                <Card.Link href={`mailto:${email}`}>{email}</Card.Link>
                 <Card.Text className={styles.cardText}>
-                    {text}
+                    {description}
                 </Card.Text>
             </Card.Body>
             <Card.Footer className="text-muted">
                 {createdUpdateText}
             </Card.Footer>
         </Card>
+
     )
 }
 
