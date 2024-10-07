@@ -1,9 +1,9 @@
-import styles from "../styles/Note.module.css";
-import stylesUtils from "../styles/utils.module.css";
+//import styles from "../styles/Note.module.css";
+//import stylesUtils from "../styles/utils.module.css";
 import {Accordion} from "react-bootstrap";
 import { Location as LocationModel } from "../models/location";
 import { formatDate } from "../utils/formatDate";
-import {MdDelete} from "react-icons/md";
+//import {MdDelete} from "react-icons/md";
 
 interface LocationProps {
     location: LocationModel,
@@ -38,6 +38,7 @@ const Location = ({location, onLocationClicked, onDeleteLocationClicked, classNa
                     <div>Latitude: {latitude}</div>
                     <div>Longitude: {longitude}</div>
                     <div>Location description: {description}</div>
+                    <div>{createdUpdateText}</div>
                 </Accordion.Body>
             </Accordion.Item>
         </Accordion>
