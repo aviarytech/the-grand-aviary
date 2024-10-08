@@ -25,7 +25,7 @@ const AddNoteDialog = ({noteToEdit, onDismiss, onNoteSaved}: AddEditNoteDialogPr
         try {
             let noteResponse: Note;
             if (noteToEdit) {
-                noteResponse = await NoteApi.UpdateNote(noteToEdit._id, input);
+                noteResponse = await NoteApi.updateNote(noteToEdit._id, input);
             }else {
                 noteResponse = await NoteApi.createNote(input);
             }

@@ -1,30 +1,41 @@
 import { Location } from "../models/location";
 
-async function fetchData(input: RequestInfo, init?: RequestInit) {
-    const response = await fetch(input, init);
-    if(response.ok){
+// Define base URL from environment variables
+const API_BASE_URL = process.env.REACT_APP_BASE_API_BASE_URL_LOCATIONS || 'http://localhost:5000/api';
+
+// Helper function for fetching data
+async function fetchData(input: string, init?: RequestInit) {
+    const response = await fetch(`${API_BASE_URL}${input}`, {
+        ...init,
+        credentials: 'include', // Include credentials like cookies
+    });
+    
+    if (response.ok) {
         return response;
-    }else {
+    } else {
         const errorBody = await response.json();
         const errorMessage = errorBody.error;
-        throw Error(errorMessage);
+        throw new Error(errorMessage);
     }
 }
 
-export async function fetchLocations(): Promise<Location[]>  {
-    const response = await fetchData("/api/locations", {method: "GET"});
+// Fetch all locations
+export async function fetchLocations(): Promise<Location[]> {
+    const response = await fetchData("/locations", { method: "GET" });
     return response.json();
 }
 
+// Location input interface
 export interface LocationInput {
-    address: string,
-    latitude: number,
-    longitude: number,
-    description?: string,
+    address: string;
+    latitude: number;
+    longitude: number;
+    description?: string;
 }
 
+// Create a new location
 export async function createLocation(location: LocationInput): Promise<Location> {
-    const response = await fetchData("/api/locations", {
+    const response = await fetchData("/locations", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -34,9 +45,9 @@ export async function createLocation(location: LocationInput): Promise<Location>
     return response.json();
 }
 
-
+// Update an existing location
 export async function updateLocation(locationId: string, location: LocationInput): Promise<Location> {
-    const response = await fetchData("/api/locations/"+ locationId, {
+    const response = await fetchData(`/locations/${locationId}`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
@@ -46,6 +57,7 @@ export async function updateLocation(locationId: string, location: LocationInput
     return response.json();
 }
 
+// Delete a location
 export async function deleteLocation(locationId: string) {
-    await fetchData("/api/locations/" + locationId, { method: "DELETE"});
+    await fetchData(`/locations/${locationId}`, { method: "DELETE" });
 }

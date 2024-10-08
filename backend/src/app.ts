@@ -1,38 +1,53 @@
 import "dotenv/config";
-import express, { Request, Response, NextFunction } from "express";
+import express, { Request, Response, /*NextFunction*/ } from "express";
 import notesRoutes from "./routes/notes";
 import locationsRoutes from "./routes/locations";
-import morgan from "morgan";//logs HTTP requests and errors
+import morgan from "morgan"; // logs HTTP requests and errors
 import createHttpError, { isHttpError } from "http-errors";
+import cors from "cors"; // Import CORS middleware
 
-//this is our server
+// This is our server
 const app = express();
-//initalize morgan
+
+const allowedOrigin = process.env.CORS_ALLOWED_ORIGIN || 'http://localhost:3000';
+
+app.use(cors({
+  origin: allowedOrigin,
+  credentials: true
+}));
+
+// Initialize morgan for logging HTTP requests
 app.use(morgan("dev"));
 
+// Middleware to parse JSON bodies
 app.use(express.json());
 
+// Use environment variables for API paths
+const NOTES_API_PATH = process.env.NOTES_API_PATH || "/api/notes"; // Default path
+const LOCATIONS_API_PATH = process.env.LOCATIONS_API_PATH || "/api/locations"; // Default path
 
-app.use("/api/notes", notesRoutes);
-app.use("/api/locations", locationsRoutes);
+// Mount routes
+app.use(NOTES_API_PATH, notesRoutes);
+app.use(LOCATIONS_API_PATH, locationsRoutes);
 
-//error message middleware
+// Error message middleware for handling 404 errors
 app.use((req, res, next) => {
-    next(createHttpError(404, "Endpoint not found"));
+    next(createHttpError(404, "Endpoint not found")); // Ensure next() is called
 });
 
-
-//ERROR HANDLER MIDDLEWARE
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
+// ERROR HANDLER MIDDLEWARE
+app.use((error: unknown, req: Request, res: Response) => { // Removed 'next'
     console.error(error);
-    let errorMessage = "An unkown error ccurred";//generic error message
-    let statusCode = 500;//error code if there is not more specific one
-    if(isHttpError(error)){//check if there is a different more accurate error code/message
+    let errorMessage = "An unknown error occurred"; // Generic error message
+    let statusCode = 500; // Default error code
+
+    if (isHttpError(error)) { // Check for specific HTTP errors
         statusCode = error.status;
         errorMessage = error.message;
     }
-    res.status(statusCode).json({error:errorMessage});//send an error message
+
+    res.status(statusCode).json({ error: errorMessage }); // Send the error response
 });
 
+// Export the app for use in other modules
 export default app;

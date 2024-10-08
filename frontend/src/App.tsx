@@ -34,6 +34,7 @@ function App() {
         setShowNotesLoadingError(false);
         setNotesLoading(true);
         const notes = await NotesApi.fetchNotes();
+        console.log("Fetched Notes:", notes); // After fetching notes
         setNotes(notes);
       } catch (error) {
         console.error(error);
