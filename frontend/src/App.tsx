@@ -1,24 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Col, Container, Row, Spinner, Nav, Navbar, NavDropdown } from 'react-bootstrap';
-import { Note as NoteModel } from './models/note';
+import { Button, Col, Container, Row, Spinner/*, Nav, Navbar, NavDropdown*/ } from 'react-bootstrap';
+import { Visitor as VisitorModel } from './models/visitor';
 import { Location as LocationModel } from './models/location';
-import Note from './components/Note';
+import Visitor from './components/Visitor';
 import Location from './components/Location';
-import styles from "./styles/NotesPage.module.css";
+import styles from "./styles/VisitorsPage.module.css";
 import stylesUtils from "./styles/utils.module.css";
-import * as NotesApi from "./network/note_api";
+import * as VisitorsApi from "./network/visitor_api";
 import * as LocationsApi from "./network/location_api";
-import AddEditNoteDialog from './components/AddEditNoteDialog';
+import AddEditVisitorDialog from './components/AddEditVisitorDialog';
 import AddEditLocationDialog from './components/AddEditLocationDialog';
 import { FaPlus } from "react-icons/fa";
-import {MdDelete} from "react-icons/md";
+//import {MdDelete} from "react-icons/md";
+import SignUpModal from './components/SignUpModal';
+import LoginModal from './components/LoginModal';
+import NavBar from './components/NavBar';
 
 function App() {
-  const [notes, setNotes] = useState<NoteModel[]>([]);
-  const [notesLoading, setNotesLoading] = useState(true);
-  const [showNotesLoadingError, setShowNotesLoadingError] = useState(false);
-  const [showAddNoteDialog, setShowAddNoteDialog] = useState(false);
-  const [noteToEdit, setNotesToEdit] = useState<NoteModel | null>(null);
+  const [visitors, setVisitors] = useState<VisitorModel[]>([]);
+  const [visitorsLoading, setVisitorsLoading] = useState(true);
+  const [showVisitorsLoadingError, setShowVisitorsLoadingError] = useState(false);
+  const [showAddVisitorDialog, setShowAddVisitorDialog] = useState(false);
+  const [visitorToEdit, setVisitorsToEdit] = useState<VisitorModel | null>(null);
 
   const [locations, setLocations] = useState<LocationModel[]>([]);
   const [locationsLoading, setLocationsLoading] = useState(true);
@@ -29,42 +32,41 @@ function App() {
   const [currentPage, setCurrentPage] = useState("visitors"); // New state for current page
 
   useEffect(() => {
-    async function loadNotes() {
+    async function loadVisitors() {
       try {
-        setShowNotesLoadingError(false);
-        setNotesLoading(true);
-        const notes = await NotesApi.fetchNotes();
-        console.log("Fetched Notes:", notes); // After fetching notes
-        setNotes(notes);
+        setShowVisitorsLoadingError(false);
+        setVisitorsLoading(true);
+        const visitors = await VisitorsApi.fetchVisitors();
+        setVisitors(visitors);
       } catch (error) {
         console.error(error);
-        setShowNotesLoadingError(true);
+        setShowVisitorsLoadingError(true);
       } finally {
-        setNotesLoading(false);
+        setVisitorsLoading(false);
       }
     }
-    loadNotes();
+    loadVisitors();
   }, []);
 
-  async function deleteNote(note: NoteModel) {
+  async function deleteVisitor(visitor: VisitorModel) {
     try {
-      await NotesApi.deleteNote(note._id);
-      setNotes(notes.filter(existingNote => existingNote._id !== note._id));
+      await VisitorsApi.deleteVisitor(visitor._id);
+      setVisitors(visitors.filter(existingVisitor => existingVisitor._id !== visitor._id));
     } catch (error) {
       console.error(error);
       alert(error);
     }
   }
 
-  const notesGrid = (
-    <Row xs={1} md={2} xl={3} className={`g-4 ${styles.noteGrid}`}>
-      {notes.map(note => (
-        <Col key={note._id}>
-          <Note
-            note={note}
-            className={styles.note}
-            onNoteClicked={setNotesToEdit}
-            onDeleteNoteClicked={deleteNote}
+  const visitorsGrid = (
+    <Row xs={1} md={2} xl={3} className={`g-4 ${styles.visitorGrid}`}>
+      {visitors.map(visitor => (
+        <Col key={visitor._id}>
+          <Visitor
+            visitor={visitor}
+            className={styles.visitor}
+            onVisitorClicked={setVisitorsToEdit}
+            onDeleteVisitorClicked={deleteVisitor}
           />
         </Col>
       ))}
@@ -100,42 +102,59 @@ function App() {
 
   // Pages for each section
   const visitorsPage = (
-    <Container className={styles.notesPage}>
+    <Container className={styles.visitorsPage}>
       <h1>Registered Visitors</h1>
-      {notesLoading && <Spinner animation="border" variant="primary" />}
-      {showNotesLoadingError && <p>Something went wrong. Please refresh the page.</p>}
-      {!notesLoading && !showNotesLoadingError && (
+      {visitorsLoading && <Spinner animation="border" variant="primary" />}
+      {showVisitorsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
+      {!visitorsLoading && !showVisitorsLoadingError && (
         <>
-          {notes.length > 0 ? notesGrid : <p>You don't have any notes yet</p>}
+          {visitors.length > 0 ? visitorsGrid : <p>You don't have any visitors yet</p>}
         </>
       )}
-      {showAddNoteDialog && (
-        <AddEditNoteDialog
-          onDismiss={() => setShowAddNoteDialog(false)}
-          onNoteSaved={(newNote) => {
-            setNotes([...notes, newNote]);
-            setShowAddNoteDialog(false);
+      {showAddVisitorDialog && (
+        <AddEditVisitorDialog
+          onDismiss={() => setShowAddVisitorDialog(false)}
+          onVisitorSaved={(newVisitor) => {
+            setVisitors([...visitors, newVisitor]);
+            setShowAddVisitorDialog(false);
           }}
         />
       )}
-      {noteToEdit && (
-        <AddEditNoteDialog
-          noteToEdit={noteToEdit}
-          onDismiss={() => setNotesToEdit(null)}
-          onNoteSaved={(updatedNote) => {
-            setNotes(
-              notes.map(existingNote => (existingNote._id === updatedNote._id ? updatedNote : existingNote))
+      {visitorToEdit && (
+        <AddEditVisitorDialog
+        visitorToEdit={visitorToEdit}
+          onDismiss={() => setVisitorsToEdit(null)}
+          onVisitorSaved={(updatedVisitor) => {
+            setVisitors(
+              visitors.map(existingVisitor => (existingVisitor._id === updatedVisitor._id ? updatedVisitor : existingVisitor))
             );
-            setNotesToEdit(null);
+            setVisitorsToEdit(null);
           }}
         />
       )}
+      {/*This is for the signup popup*/}
+      { false && (
+        <SignUpModal
+          onDismiss={() => {}}
+          onSignUpSuccessful={() => {}}
+        />
+
+      )}
+      {/*This is for the login popup*/}
+      { false && (
+        <LoginModal
+          onDismiss={() => {}}
+          onLoginSuccessful={() => {}}
+        />
+
+      )}
+      
       <Button
         className={`mb-4 ${stylesUtils.blockCenter} ${stylesUtils.flexCenter}`}
-        onClick={() => setShowAddNoteDialog(true)}
+        onClick={() => setShowAddVisitorDialog(true)}
       >
         <FaPlus />
-        Add new note
+        Add New Visitor
       </Button>
     </Container>
   );
@@ -157,11 +176,6 @@ function App() {
                       onLocationClicked={() => setLocationsToEdit(location)}
                       onDeleteLocationClicked={deleteLocation}
                       />
-                    </Col>
-                    <Col xs="auto">
-                      <Button variant="danger" onClick={() => deleteLocation(location)}>
-                      <MdDelete />
-                      </Button>
                     </Col>
                   </Row>
                 ))}
@@ -225,28 +239,14 @@ function App() {
 
   return (
     <div>
-      <Navbar collapseOnSelect bg="primary" variant="dark" expand="lg" className="mb-4">
-        <Container>
-          <Navbar.Brand>Visitor Management System</Navbar.Brand>
-          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-          <Navbar.Collapse id="responsive-navbar-nav">
-            <Nav className="me-auto">
-              <Nav.Link onClick={() => setCurrentPage("visitors")}>Visitors</Nav.Link>
-              <Nav.Link onClick={() => setCurrentPage("locations")}>Locations</Nav.Link>
-              <NavDropdown title="VC's" id="collapsible-nav-dropdown">
-                <NavDropdown.Item onClick={() => setCurrentPage("activeVC")}>Active</NavDropdown.Item>
-                <NavDropdown.Item onClick={() => setCurrentPage("revokedVC")}>Revoked</NavDropdown.Item>
-              </NavDropdown>
-              <Nav.Link onClick={() => setCurrentPage("settings")}>Settings</Nav.Link>
-            </Nav>
-            <Nav>
-              <Nav.Link eventKey={2} href="#logout">
-                Logout
-              </Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+      <NavBar 
+        loggedInUser={null}
+        onLoginClicked={() => {}}
+        onSignUpClicked={() => {}}
+        onLogoutSuccessful={() => {}}
+        setCurrentPage={setCurrentPage}
+      />
+
 
       {/* Conditionally render pages */}
       {currentPage === "visitors" && visitorsPage}

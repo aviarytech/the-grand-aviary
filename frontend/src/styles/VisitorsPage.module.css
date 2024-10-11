@@ -1,0 +1,48 @@
+.visitorsPage {
+    display: flex;
+    flex-direction: column;
+    /*align-items: center;*/
+}
+
+.visitorsGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem; /* Keep space between items */
+    justify-content: center; /* Center the visitors within the grid */
+    max-width: 1200px; /* Limit the maximum width of the grid */
+    margin: 0 auto; /* Center the grid horizontally */
+}
+.visitor {
+    flex: 1 1 calc(100% - 1rem);
+    max-width: 100%;
+    min-width: 80%;
+    min-height: 400px; /* Ensure a minimum height */
+    transition: box-shadow 0.2s ease-in-out;
+    cursor: pointer;
+    max-height: 400px;
+}
+
+
+
+@media (min-width: 576px) { /* Small screens like tablets */
+    .visitor {
+        flex: 1 1 calc(50% - 1rem); /* Each visitor takes up 50% of the width */
+    }
+}
+
+@media (min-width: 768px) { /* Medium screens like laptops */
+    .visitor {
+        flex: 1 1 calc(33.33% - 1rem); /* Each visitor takes up 33.33% of the width */
+    }
+}
+
+@media (min-width: 1200px) { /* Large screens like desktops */
+    .visitor {
+        flex: 1 1 calc(25% - 1rem); /* Each visitor takes up 25% of the width */
+    }
+}
+
+.visitor:hover {
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+}
+

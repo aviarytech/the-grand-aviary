@@ -30,7 +30,7 @@ export const getLocation: RequestHandler = async (req, res, next) => {
         const location = await LocationModel.findById(locationId).exec();
         //if there is no location, throw a note not found error
         if(!location){
-            throw createHttpError(404, "Note not found");
+            throw createHttpError(404, "Location not found");
         }
         //send a success response
         res.status(200).json(location);

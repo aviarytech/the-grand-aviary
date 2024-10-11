@@ -1,0 +1,98 @@
+.visitorsPage {
+    display: flex;
+    flex-direction: column;
+}
+
+.visitorsGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem; /* Keep space between items */
+    justify-content: center; /* Center the visitors */
+    background-color: #f0f0f0; /* Light background for contrast */
+    padding: 20px; /* Add padding */
+}
+
+.visitorCard {
+    position: relative;
+    background: linear-gradient(135deg, #c6e5ff, #a7c0ff); /* Gradient background */
+    border: 1px solid #ccc; /* Border for the card */
+    border-radius: 10px; /* Rounded corners */
+    overflow: hidden; /* Hide overflow */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    width: 100%;
+    max-width: 300px; /* Set a max width */
+}
+
+.visitorCard:hover {
+    transform: scale(1.05); /* Slightly enlarge on hover */
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 6px 24px 0px, rgba(0, 0, 0, 0.1) 0px 0px 0px 1px;
+}
+
+.avatarContainer {
+    width: 100%; /* Full width for the image section */
+    height: 300px; /* Fixed height for the image */
+    display: flex; /* Center content */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    background-color: #23959e; /* Blue background for placeholder */
+    margin-bottom: 5px; /* Adjust margin for space between image and text */
+}
+
+.descriptionContainer {
+    position: relative; /* Position relative to the container */
+    max-height: 3em; /* Height to accommodate 2 lines (assuming line-height is 2em) */
+    overflow: hidden; /* Hide overflowing text */
+}
+
+.description {
+    white-space: pre-wrap; /* Preserve whitespace and line breaks */
+    display: -webkit-box; /* Flexbox for truncating */
+    -webkit-box-orient: vertical; /* Define box orientation */
+    -webkit-line-clamp: 2; /* Limit to 2 lines */
+    overflow: hidden; /* Hide overflowing text */
+    text-overflow: ellipsis; /* Show ellipsis for overflowed text */
+}
+
+/* Fading effect */
+.fade-out {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1em; /* Height of the fade-out area */
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%); /* Fading gradient */
+}
+
+.initials {
+    font-weight: bold;
+}
+
+.cardBody {
+    padding: 10px; /* Reduced padding for the card body */
+}
+
+.cardBody > * {
+    margin: 0; /* Remove default margins for all child elements */
+}
+.cardText {
+    color: #333; /* Darker text for better readability */
+}
+
+/* Responsive Design */
+@media (min-width: 576px) {
+    .visitor {
+        flex: 1 1 calc(50% - 1rem); /* Each visitor takes up 50% of the width */
+    }
+}
+
+@media (min-width: 768px) {
+    .visitor {
+        flex: 1 1 calc(33.33% - 1rem); /* Each visitor takes up 33.33% of the width */
+    }
+}
+
+@media (min-width: 1200px) {
+    .visitor {
+        flex: 1 1 calc(25% - 1rem); /* Each visitor takes up 25% of the width */
+    }
+}

@@ -1,0 +1,28 @@
+/* Custom styles for the Location card */
+.location-card {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.location-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.location-card .card-body {
+    padding: 20px;
+}
+
+.location-card .card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.location-card .card-text div {
+    margin-bottom: 0.5rem;
+}
+
+.location-card .btn {
+    min-width: 90px;
+}
