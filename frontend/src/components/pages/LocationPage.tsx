@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Button, Container } from 'react-bootstrap';
 import { FaPlus } from "react-icons/fa";
 import Location from '../Location'; // Ensure you have a Location component for rendering individual locations

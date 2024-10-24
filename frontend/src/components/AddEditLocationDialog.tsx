@@ -3,7 +3,6 @@ import { Location } from "../models/location";
 import { useForm } from "react-hook-form";
 import { LocationInput } from "../network/location_api";
 import * as LocationApi from "../network/location_api";
-import TextInputField from "./form/TextInputField";
 
 
 interface AddEditLocationDialogProps {
