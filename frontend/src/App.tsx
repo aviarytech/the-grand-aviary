@@ -1,260 +1,129 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Col, Container, Row, Spinner/*, Nav, Navbar, NavDropdown*/ } from 'react-bootstrap';
-import { Visitor as VisitorModel } from './models/visitor';
-import { Location as LocationModel } from './models/location';
-import Visitor from './components/Visitor';
-import Location from './components/Location';
-import styles from "./styles/VisitorsPage.module.css";
-import stylesUtils from "./styles/utils.module.css";
-import * as VisitorsApi from "./network/visitor_api";
-import * as LocationsApi from "./network/location_api";
-import AddEditVisitorDialog from './components/AddEditVisitorDialog';
-import AddEditLocationDialog from './components/AddEditLocationDialog';
-import { FaPlus } from "react-icons/fa";
-//import {MdDelete} from "react-icons/md";
-import SignUpModal from './components/SignUpModal';
-import LoginModal from './components/LoginModal';
+import { UserManager, WebStorageStateStore } from 'oidc-client-ts'; 
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import VisitorsPage from './components/pages/VisitorPage';
+import LocationsPage from './components/pages/LocationPage';
+import RevokedVCPage from './components/pages/RevokedVCPage';
+import ActiveVCPage from './components/pages/ActiveVCPage';
+import NotFound from './components/pages/NotFound';
+import CallbackPage from './components/pages/CallbackPage';
+import NotLoggedInPage from './components/pages/NotLoggedInPage';
 import NavBar from './components/NavBar';
+import * as VisitorsApi from './network/visitor_api';
+import * as LocationsApi from './network/location_api';
+import { Visitor } from './models/visitor';
+import { Location } from './models/location';
+//import jwt from 'jsonwebtoken';
+
+// OIDC configuration
+const userManager = new UserManager({
+  authority: process.env.REACT_APP_ISSUER_BASE_URL || " ",
+  client_id: process.env.REACT_APP_CLIENT_ID || " ",
+  redirect_uri: `${process.env.REACT_APP_BACKEND_API}/callback` || 'http://localhost:5000/api/callback',
+  post_logout_redirect_uri: `${process.env.REACT_APP_BASE_URL}/logout` || 'http://localhost:3000/logout',
+  response_type: 'code',
+  scope: 'openid profile email',
+  metadata: {
+    issuer: process.env.REACT_APP_ISSUER_BASE_URL, 
+    authorization_endpoint: process.env.REACT_APP_AUTHEND, 
+    userinfo_endpoint: process.env.REACT_APP_USEREND, 
+    end_session_endpoint: process.env.REACT_APP_ENDSESSIONENDPOINT
+  },
+  userStore: new WebStorageStateStore({ store: window.localStorage })
+});
 
 function App() {
-  const [visitors, setVisitors] = useState<VisitorModel[]>([]);
-  const [visitorsLoading, setVisitorsLoading] = useState(true);
-  const [showVisitorsLoadingError, setShowVisitorsLoadingError] = useState(false);
-  const [showAddVisitorDialog, setShowAddVisitorDialog] = useState(false);
-  const [visitorToEdit, setVisitorsToEdit] = useState<VisitorModel | null>(null);
+  const [loggedInUser, setLoggedInUser] = useState<any>(null);  // Track OIDC user
+  const [accessToken, setAccessToken] = useState<string | null>(null); // Track OIDC access token
+  const [visitors, setVisitors] = useState<Visitor[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
 
-  const [locations, setLocations] = useState<LocationModel[]>([]);
-  const [locationsLoading, setLocationsLoading] = useState(true);
-  const [showLocationsLoadingError, setShowLocationsLoadingError] = useState(false);
-  const [showAddLocationDialog, setShowAddLocationDialog] = useState(false);
-  const [locationToEdit, setLocationsToEdit] = useState<LocationModel | null>(null);
-
-  const [currentPage, setCurrentPage] = useState("visitors"); // New state for current page
-
+  // Fetch authentication status
   useEffect(() => {
-    async function loadVisitors() {
-      try {
-        setShowVisitorsLoadingError(false);
-        setVisitorsLoading(true);
-        const visitors = await VisitorsApi.fetchVisitors();
-        setVisitors(visitors);
-      } catch (error) {
-        console.error(error);
-        setShowVisitorsLoadingError(true);
-      } finally {
-        setVisitorsLoading(false);
+    async function fetchAuthStatus() {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_API}/auth-status`, {
+        credentials: 'include', // Include credentials to allow cookies/session data
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.isAuthenticated) {
+          setLoggedInUser({
+            sub: data.user.sub,
+            email: data.user.email,
+            name: data.user.name
+          }); // Set user information in state
+          setAccessToken(data.accessToken); // Set the access token
+        } else {
+          setLoggedInUser(null);
+          setAccessToken(null);
+        }
+      } else {
+        console.error("Failed to fetch auth status");
       }
     }
-    loadVisitors();
+    
+    fetchAuthStatus();
   }, []);
 
-  async function deleteVisitor(visitor: VisitorModel) {
-    try {
-      await VisitorsApi.deleteVisitor(visitor._id);
-      setVisitors(visitors.filter(existingVisitor => existingVisitor._id !== visitor._id));
-    } catch (error) {
-      console.error(error);
-      alert(error);
-    }
-  }
-
-  const visitorsGrid = (
-    <Row xs={1} md={2} xl={3} className={`g-4 ${styles.visitorGrid}`}>
-      {visitors.map(visitor => (
-        <Col key={visitor._id}>
-          <Visitor
-            visitor={visitor}
-            className={styles.visitor}
-            onVisitorClicked={setVisitorsToEdit}
-            onDeleteVisitorClicked={deleteVisitor}
-          />
-        </Col>
-      ))}
-    </Row>
-  );
-
+  // Handle login with OIDC
   useEffect(() => {
-    async function loadLocations() {
-      try {
-        setShowLocationsLoadingError(false);
-        setLocationsLoading(true);
-        const locations = await LocationsApi.fetchLocations();
-        setLocations(locations);
-      } catch (error) {
-        console.error(error);
-        setShowLocationsLoadingError(true);
-      } finally {
-        setLocationsLoading(false);
+    async function getUser() {
+      const user = await userManager.getUser();
+      console.log("User from OIDC:", user);
+      if (user && !user.expired ) {
+        setLoggedInUser(user.profile);
+        setAccessToken(user.access_token); // Store access token
+      } else {
+        setLoggedInUser(null);
+        setAccessToken(null); // Reset access token
       }
     }
-    loadLocations();
+    getUser();
   }, []);
 
-  async function deleteLocation(location: LocationModel) {
-    try {
-      await LocationsApi.deleteLocation(location._id);
-      setLocations(locations.filter(existingLocation => existingLocation._id !== location._id));
-    } catch (error) {
-      console.error(error);
-      alert("An error occurred while deleting the location.");
+  // Load visitors and locations when logged in and access token is available
+  useEffect(() => {
+    async function loadUserData() {
+      try {
+        if (loggedInUser && accessToken) {
+          // Fetch visitors and locations with the access token in headers
+          const visitorsData = await VisitorsApi.fetchVisitors(accessToken);
+          const filteredVisitors = visitorsData.filter((visitor: Visitor) => visitor.createdBy === loggedInUser.sub);
+          setVisitors(filteredVisitors);
+  
+          const locationsData = await LocationsApi.fetchLocations(accessToken);
+          const filteredLocations = locationsData.filter((location: Location) => location.createdBy === loggedInUser.sub);
+          setLocations(filteredLocations);
+        }
+      } catch (error) {
+        console.error("Error loading user data: ", error);
+      }
     }
-  }
-
-  // Pages for each section
-  const visitorsPage = (
-    <Container className={styles.visitorsPage}>
-      <h1>Registered Visitors</h1>
-      {visitorsLoading && <Spinner animation="border" variant="primary" />}
-      {showVisitorsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
-      {!visitorsLoading && !showVisitorsLoadingError && (
-        <>
-          {visitors.length > 0 ? visitorsGrid : <p>You don't have any visitors yet</p>}
-        </>
-      )}
-      {showAddVisitorDialog && (
-        <AddEditVisitorDialog
-          onDismiss={() => setShowAddVisitorDialog(false)}
-          onVisitorSaved={(newVisitor) => {
-            setVisitors([...visitors, newVisitor]);
-            setShowAddVisitorDialog(false);
-          }}
-        />
-      )}
-      {visitorToEdit && (
-        <AddEditVisitorDialog
-        visitorToEdit={visitorToEdit}
-          onDismiss={() => setVisitorsToEdit(null)}
-          onVisitorSaved={(updatedVisitor) => {
-            setVisitors(
-              visitors.map(existingVisitor => (existingVisitor._id === updatedVisitor._id ? updatedVisitor : existingVisitor))
-            );
-            setVisitorsToEdit(null);
-          }}
-        />
-      )}
-      {/*This is for the signup popup*/}
-      { false && (
-        <SignUpModal
-          onDismiss={() => {}}
-          onSignUpSuccessful={() => {}}
-        />
-
-      )}
-      {/*This is for the login popup*/}
-      { false && (
-        <LoginModal
-          onDismiss={() => {}}
-          onLoginSuccessful={() => {}}
-        />
-
-      )}
-      
-      <Button
-        className={`mb-4 ${stylesUtils.blockCenter} ${stylesUtils.flexCenter}`}
-        onClick={() => setShowAddVisitorDialog(true)}
-      >
-        <FaPlus />
-        Add New Visitor
-      </Button>
-    </Container>
-  );
-
-  const locationsPage = (
-    <Container>
-        <h1>Locations</h1>
-        {locationsLoading && <Spinner animation="border" variant="primary" />}
-        {showLocationsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
-        {!locationsLoading && !showLocationsLoadingError && (
+  
+    loadUserData();
+  }, [loggedInUser, accessToken]);
+  
+  return (
+    <Router>
+      <NavBar loggedInUser={loggedInUser} />
+      <Routes>
+        {loggedInUser ? (
           <>
-            {locations.length > 0 ? (
-              <div>
-                {locations.map(location => (
-                  <Row key={location._id} className="align-items-center mb-3">
-                    <Col>
-                      <Location
-                      location={location}
-                      onLocationClicked={() => setLocationsToEdit(location)}
-                      onDeleteLocationClicked={deleteLocation}
-                      />
-                    </Col>
-                  </Row>
-                ))}
-              </div>
-            ) : (<p>You don't have any locations yet</p>)}
+            <Route path="/" element={<VisitorsPage visitors={visitors} />} />
+            <Route path="/visitors" element={<VisitorsPage visitors={visitors} />} />
+            <Route path="/locations" element={<LocationsPage locations={locations} />} />
+            <Route path="/activeVC" element={<ActiveVCPage />} />
+            <Route path="/revokedVC" element={<RevokedVCPage />} />
+          </>
+        ) : (
+          <>
+            <Route path="/callback" element={<CallbackPage />} />
+            <Route path="/pleaseLogin" element={<NotLoggedInPage />} />
           </>
         )}
-        {showAddLocationDialog && (
-            <AddEditLocationDialog
-                onDismiss={() => setShowAddLocationDialog(false)}
-                onLocationSaved={(newLocation) => {
-                    setLocations([...locations, newLocation]);
-                    setShowAddLocationDialog(false);
-                }}
-            />
-        )}
-        {locationToEdit && (
-            <AddEditLocationDialog
-                locationToEdit={locationToEdit}
-                onDismiss={() => setLocationsToEdit(null)}
-                onLocationSaved={(updatedLocation) => {
-                    setLocations(
-                        locations.map(existingLocation => 
-                            (existingLocation._id === updatedLocation._id ? updatedLocation : existingLocation))
-                    );
-                    setLocationsToEdit(null);
-                }}
-            />
-        )}
-        <Button
-            className={`mb-4 ${stylesUtils.blockCenter} ${stylesUtils.flexCenter}`}
-            onClick={() => setShowAddLocationDialog(true)}
-        >
-            <FaPlus />
-            Add new location
-        </Button>
-    </Container>
-);
-
-
-  const activeVCPage = (
-    <Container>
-      <h1>Active VC's</h1>
-      <p>List of active VC's will go here.</p>
-    </Container>
-  );
-
-  const revokedVCPage = (
-    <Container>
-      <h1>Revoked VC's</h1>
-      <p>List of revoked VC's will go here.</p>
-    </Container>
-  );
-
-  const settingsPage = (
-    <Container>
-      <h1>Settings</h1>
-      <p>Settings options will go here.</p>
-    </Container>
-  );
-
-  return (
-    <div>
-      <NavBar 
-        loggedInUser={null}
-        onLoginClicked={() => {}}
-        onSignUpClicked={() => {}}
-        onLogoutSuccessful={() => {}}
-        setCurrentPage={setCurrentPage}
-      />
-
-
-      {/* Conditionally render pages */}
-      {currentPage === "visitors" && visitorsPage}
-      {currentPage === "locations" && locationsPage}
-      {currentPage === "activeVC" && activeVCPage}
-      {currentPage === "revokedVC" && revokedVCPage}
-      {currentPage === "settings" && settingsPage}
-    </div>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
   );
 }
 

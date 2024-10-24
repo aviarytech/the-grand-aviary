@@ -5,6 +5,7 @@ export interface Visitor {
     lastName: string;
     email: string;
     description?: string;
+    createdBy: string;
     createdAt: string;
     updatedAt: string;
 }

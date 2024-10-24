@@ -1,75 +1,35 @@
 import { Visitor } from "../models/visitor";
-import { User } from "../models/users";
 
-// Define base URL from environment variables
-const API_BASE_URL = process.env.REACT_APP_BASE_API_BASE_URL_VISITORS || 'http://localhost:5000/api';
-
-// Helper function for fetching data
 async function fetchData(input: string, init?: RequestInit) {
-    const response = await fetch(`${API_BASE_URL}${input}`, {
+    const response = await fetch(`${process.env.REACT_APP_BACKEND_API}/visitors`, {
         ...init,
-        credentials: 'include', // Include credentials like cookies
+        credentials: 'include',
     });
-    
+    console.log(input)
     if (response.ok) {
-        return response; // Return the response if it's OK
+        return response;
     } else {
         const errorBody = await response.json();
-        const errorMessage = errorBody.error || 'An error occurred'; // Fallback error message
-        console.error(`Fetch error: ${errorMessage}`); // Log the error for debugging
+        const errorMessage = errorBody.error || 'An error occurred';
+        console.error(`Fetch error: ${errorMessage}`);
         throw new Error(errorMessage);
     }
 }
 
-export async function getLoggedInUser(): Promise<User> {
-    const response = await fetchData("/users", {method: "GET"});
-    return response.json();
-}
-
-export interface SignUpCredentials {
-    username: string,
-    email: string,
-    password: string,
-}
-
-export async function signUp(credentials: SignUpCredentials): Promise<User> {
-    const response = await fetchData("/users/signup", 
-    {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
+// Fetch all visitors for a specific user
+export async function fetchVisitors(accessToken: string) {
+    const response = await fetch(`${process.env.REACT_APP_BACKEND_API}/visitors`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      credentials: 'include',
     });
+    if (!response.ok) {
+      throw new Error('Failed to fetch visitors');
+    }
     return response.json();
-}
-
-export interface LoginCredentials {
-    username: string,
-    password: string,
-}
-
-export async function login(credentials: LoginCredentials): Promise<User> {
-    const response = await fetchData("/users/login", 
-    {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-    });
-    return response.json();
-}
-
-export async function logout() {
-    await fetchData("/users/logout", {method: "GET"});
-}
-
-// Fetch all visitors
-export async function fetchVisitors(): Promise<Visitor[]> {
-    const response = await fetchData("/visitors", { method: "GET" });
-    return response.json(); // Parse and return JSON data
-}
+  }
 
 // visitor input interface
 export interface VisitorInput {

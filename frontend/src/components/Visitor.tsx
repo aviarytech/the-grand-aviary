@@ -18,8 +18,7 @@ const Visitor = ({
   onDeleteVisitorClicked,
   className,
 }: VisitorProps) => {
-  const { firstName, lastName, email, description, createdAt, updatedAt } =
-    visitor;
+  const { firstName, lastName, email, description, createdAt, updatedAt } = visitor;
 
   let createdUpdateText: string;
   if (updatedAt > createdAt) {
@@ -43,7 +42,7 @@ const Visitor = ({
             className={`${styles.deleteIcon} text-muted ms-auto`}
             onClick={(e) => {
               onDeleteVisitorClicked(visitor);
-              e.stopPropagation();
+              e.stopPropagation(); // Prevent triggering onVisitorClicked
             }}
           />
         </Card.Title>

@@ -1,108 +1,86 @@
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
-import UserModel from "../models/user"; // Ensure the correct type is imported
-import bcrypt from "bcrypt";
+import UserModel from "../models/user";
+import { Session } from "inspector/promises";
 
+// Get authenticated user
 export const getAuthenticatedUser: RequestHandler = async (req, res, next) => {
-    const authenticatedUserId = req.session.userId;
-
     try {
-        if(!authenticatedUserId){
+        const authenticatedUserId = req.session.userId;
+        if (!authenticatedUserId) {
             throw createHttpError(401, "User not authenticated");
         }
 
         const user = await UserModel.findById(authenticatedUserId).select("+email").exec();
-
         res.status(200).json(user);
     } catch (error) {
         next(error);
     }
 };
 
+// Sign up
 interface SignUpBody {
-    username?: string;
     email?: string;
-    password?: string;
+    name?: string;
+    picture?: string;
 }
 
-export const signUp: RequestHandler<unknown, unknown, SignUpBody, unknown> = async (req, res, next) => {
-    const username = req.body.username;
-    const email = req.body.email;
-    const passwordRaw = req.body.password;
 
+export const signUp: RequestHandler<{session: Session}, unknown, SignUpBody, unknown> = async (req, res, next) => {
+    const { email, name, picture } = req.body;
     try {
-        if (!username || !email || !passwordRaw) {
+        if (!email || !name) {
             throw createHttpError(400, "Parameter Missing");
         }
 
-        const existingUsername = await UserModel.findOne({ username: username }).exec();
-
-        if (existingUsername) {
-            throw createHttpError(409, "Username already taken. Please choose a different one or login instead.");
-        }
-
-        const existingEmail = await UserModel.findOne({ email: email }).exec();
+        const existingEmail = await UserModel.findOne({ email }).exec();
         if (existingEmail) {
             throw createHttpError(409, "Email already taken. Please choose a different one or login instead.");
         }
 
-        const passwordHashed = await bcrypt.hash(passwordRaw, 10);
-
         const newUser = await UserModel.create({
-            username: username,
-            email: email,
-            password: passwordHashed,
+            email,
+            name,
+            picture,
         });
 
-        req.session.userId = newUser._id;
-
+        req.session.user = newUser;
         res.status(201).json(newUser);
     } catch (error) {
         next(error);
     }
 };
 
+// Login
 interface LoginBody {
-    username?: string;
-    password?: string;
+    email?: string;
 }
 
 export const login: RequestHandler<unknown, unknown, LoginBody, unknown> = async (req, res, next) => {
-    const username = req.body.username;
-    const password = req.body.password;
-
+    const { email } = req.body;
     try {
-        if (!username || !password) {
+        if (!email) {
             throw createHttpError(400, "Parameter Missing");
         }
 
-        // Ensure TypeScript knows `user` could be null, so we use type assertion
-        const user = await UserModel.findOne({ username:username }).select("+password +email").exec();
-
+        const user = await UserModel.findOne({ email }).select("+email").exec();
         if (!user) {
             throw createHttpError(401, "Invalid credentials");
         }
 
-        const passwordMatch = await bcrypt.compare(password, user.password);
-
-        if (!passwordMatch) {
-            throw createHttpError(401, "Invalid credentials");
-        }
-
-        req.session.userId = user._id;
-
-        res.status(201).json(user); // Use 200 OK for successful login
+        req.session.user = user;
+        res.status(200).json(user);
     } catch (error) {
         next(error);
     }
 };
 
-
+// Logout
 export const logout: RequestHandler = (req, res, next) => {
     req.session.destroy(error => {
-        if(error){
+        if (error) {
             next(error);
-        }else{
+        } else {
             res.sendStatus(200);
         }
     });

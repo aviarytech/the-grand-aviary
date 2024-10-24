@@ -6,14 +6,13 @@ import * as VisitorApi from "../network/visitor_api";
 import TextInputField from "./form/TextInputField";
 
 interface AddEditVisitorDialogProps {
-    visitorToEdit?: Visitor,
-    onDismiss: () => void,
-    onVisitorSaved: (visitor: Visitor) => void,
+    visitorToEdit?: Visitor | null; // Updated to accept null
+    onDismiss: () => void;
+    onVisitorSaved: (visitor: Visitor) => void;
 }
 
-const AddVisitorDialog = ({visitorToEdit, onDismiss, onVisitorSaved}: AddEditVisitorDialogProps) => {
-
-    const {register, handleSubmit, formState: {errors, isSubmitting} } = useForm<VisitorInput>({
+const AddVisitorDialog = ({ visitorToEdit, onDismiss, onVisitorSaved }: AddEditVisitorDialogProps) => {
+    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<VisitorInput>({
         defaultValues: {
             firstName: visitorToEdit?.firstName || "",
             lastName: visitorToEdit?.lastName || "",
@@ -23,17 +22,18 @@ const AddVisitorDialog = ({visitorToEdit, onDismiss, onVisitorSaved}: AddEditVis
     });
 
     async function onSubmit(input: VisitorInput) {
+        console.log('Form submitted with:', input); // Log the input
         try {
             let visitorResponse: Visitor;
             if (visitorToEdit) {
                 visitorResponse = await VisitorApi.updateVisitor(visitorToEdit._id, input);
-            }else {
+            } else {
                 visitorResponse = await VisitorApi.createVisitor(input);
             }
             onVisitorSaved(visitorResponse);
+            onDismiss(); // Close the modal after saving
         } catch (error) {
             console.error(error);
-            // You could show a user-friendly error message here
             alert("An error occurred while saving the visitor. Please try again.");
         }
     }
@@ -41,9 +41,7 @@ const AddVisitorDialog = ({visitorToEdit, onDismiss, onVisitorSaved}: AddEditVis
     return (
         <Modal show onHide={onDismiss}>
             <ModalHeader closeButton>
-                <ModalTitle>
-                    {visitorToEdit ? "Edit Visitor" : "Add Visitor"}
-                </ModalTitle>
+                <ModalTitle>{visitorToEdit ? "Edit Visitor" : "Add Visitor"}</ModalTitle>
             </ModalHeader>
             <Modal.Body>
                 <Form id="addEditVisitorForm" onSubmit={handleSubmit(onSubmit)}>
@@ -53,7 +51,7 @@ const AddVisitorDialog = ({visitorToEdit, onDismiss, onVisitorSaved}: AddEditVis
                         type="text"
                         placeholder="First Name"
                         register={register}
-                        registerOptions={{required: "Required"}}
+                        registerOptions={{ required: "Required" }}
                         error={errors.firstName}
                     />
                     <TextInputField
@@ -62,7 +60,7 @@ const AddVisitorDialog = ({visitorToEdit, onDismiss, onVisitorSaved}: AddEditVis
                         type="text"
                         placeholder="Last Name"
                         register={register}
-                        registerOptions={{required: "Required"}}
+                        registerOptions={{ required: "Required" }}
                         error={errors.lastName}
                     />
                     <TextInputField
@@ -71,7 +69,7 @@ const AddVisitorDialog = ({visitorToEdit, onDismiss, onVisitorSaved}: AddEditVis
                         type="email"
                         placeholder="Email"
                         register={register}
-                        registerOptions={{required: "Required"}}
+                        registerOptions={{ required: "Required" }}
                         error={errors.email}
                     />
                     <TextInputField
@@ -83,10 +81,7 @@ const AddVisitorDialog = ({visitorToEdit, onDismiss, onVisitorSaved}: AddEditVis
                         register={register}
                     />      
 
-                    <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                    >
+                    <Button type="submit" disabled={isSubmitting}>
                         Save
                     </Button>
                 </Form>

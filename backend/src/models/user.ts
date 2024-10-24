@@ -1,12 +1,19 @@
-//here we initalize our user model, will most likely change this when real one is made
-import { InferSchemaType, Schema, model } from "mongoose";
+import mongoose, { Schema, Document} from 'mongoose';
+
+export interface IUser extends Document {
+  email: string;
+  name: string;
+  access_token?: string;
+  picture?: string;
+}
 
 const userSchema = new Schema({
-    username: { type: String, required: true, unique: true},
-    email: { type: String, required: true, unique: true, select: false},//false so that the email is not returned
-    password: { type: String, required: true, select: false},
-});
+  email: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  access_token: { type: String },
+  picture: { type: String },
+}, { timestamps: true });
 
-type User = InferSchemaType<typeof userSchema>;
+const UserModel = mongoose.model<IUser>('User', userSchema);
+export default UserModel;
 
-export default model<User>("User", userSchema);

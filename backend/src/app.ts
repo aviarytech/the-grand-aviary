@@ -1,71 +1,83 @@
 import "dotenv/config";
-import express, { Request, Response, /*NextFunction*/ } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import visitorsRoutes from "./routes/visitors";
 import locationsRoutes from "./routes/locations";
 import usersRoutes from "./routes/users";
+import authRoutes from "./routes/auth";
 import morgan from "morgan"; // logs HTTP requests and errors
 import createHttpError, { isHttpError } from "http-errors";
+import cookieParser from "cookie-parser";
 import cors from "cors"; // Import CORS middleware
 import session from "express-session";
-import env from "./util/validateEnv";
-import MongoStore from "connect-mongo";
+//import env from "./util/validateEnv";
+//import MongoStore from "connect-mongo";
+import { auth, requiresAuth } from "express-openid-connect";
+import { sessionConfig } from "./config/sessionConfig";
+import { oidcConfig } from "./config/oidcConfig";
 
-// This is our server
+// Initialize the Express app
 const app = express();
 
+app.set('trust proxy', true);
+
+
+//===========================Here are the config stuff below this========================
+// Define the allowed origin for CORS
 const allowedOrigin = process.env.CORS_ALLOWED_ORIGIN || 'http://localhost:3000';
 
+// Use CORS middleware to handle cross-origin requests
 app.use(cors({
   origin: allowedOrigin,
-  credentials: true
+  credentials: true,
 }));
+
+// Set up session management with MongoDB session store
+app.use(session(sessionConfig));
+
+// Use OpenID Connect middleware for authentication
+app.use(auth(oidcConfig));
+//===========================Here are the config stuff above this================================
+
 
 // Initialize morgan for logging HTTP requests
 app.use(morgan("dev"));
 
-// Middleware to parse JSON bodies
+// Middleware to parse JSON and URL-encoded bodies
 app.use(express.json());
-
-app.use(session({
-    secret: env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 60*60 *1000
-    },
-    rolling: true,
-    store: MongoStore.create({
-        mongoUrl: env.MONGO_CONNECTION_STRING,
-    }),
-}));
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 // Use environment variables for API paths
-const VISITORS_API_PATH = process.env.VISITORS_API_PATH || "/api/visitors"; // Default path
-const LOCATIONS_API_PATH = process.env.LOCATIONS_API_PATH || "/api/locations"; // Default path
-const USERS_API_PATH = process.env.USERS_API_PATH || "/api/users"; // Default path
-// Mount routes
-app.use(VISITORS_API_PATH, visitorsRoutes);
+const VISITORS_API_PATH = process.env.VISITORS_API_PATH || "/api/visitors";
+const LOCATIONS_API_PATH = process.env.LOCATIONS_API_PATH || "/api/locations";
+const USERS_API_PATH = process.env.USERS_API_PATH || "/api/users";
+const AUTH_API_PATH = process.env.AUTH_API_PATH || "/api";
+
+// Mount API routes
+app.use(VISITORS_API_PATH, visitorsRoutes, requiresAuth());
 app.use(LOCATIONS_API_PATH, locationsRoutes);
 app.use(USERS_API_PATH, usersRoutes);
+app.use(AUTH_API_PATH, authRoutes); 
 
-// Error message middleware for handling 404 errors
-app.use((req, res, next) => {
-    next(createHttpError(404, "Endpoint not found")); // Ensure next() is called
+
+//========================ERROR HANDLERS===========================
+// 404 error handling (Middleware for unknown routes)
+app.use((req: Request, res: Response, next: NextFunction) => {
+    next(createHttpError(404, "Endpoint not found")); // Pass error to the next middleware
 });
 
-// ERROR HANDLER MIDDLEWARE
-app.use((error: unknown, req: Request, res: Response) => { // Removed 'next'
-    console.error(error);
-    let errorMessage = "An unknown error occurred"; // Generic error message
-    let statusCode = 500; // Default error code
-
-    if (isHttpError(error)) { // Check for specific HTTP errors
+app.use((error: unknown, req: Request, res: Response) => {
+    //console.error(error);  // Log the error for debugging
+    let errorMessage = "An unknown error occurred"; // Default error message
+    let statusCode = 500; // Default status code for internal server error
+    if (isHttpError(error)) {
+        // If the error is an HTTP error, set the correct status and message
         statusCode = error.status;
-        errorMessage = error.message;
+        errorMessage = process.env.NODE_ENV === 'production' ? 'Internal Server Error' : error.message;
     }
-
-    res.status(statusCode).json({ error: errorMessage }); // Send the error response
+    // Send the error response to the client
+    res.status(statusCode).json({ error: errorMessage });
 });
+//========================ERROR HANDLERS===========================
 
-// Export the app for use in other modules
 export default app;

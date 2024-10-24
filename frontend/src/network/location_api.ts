@@ -1,36 +1,43 @@
 import { Location } from "../models/location";
 
-// Define base URL from environment variables
-const API_BASE_URL = process.env.REACT_APP_BASE_API_BASE_URL_LOCATIONS || 'http://localhost:5000/api';
-
-// Helper function for fetching data
+// Reuse the same fetchData utility function
 async function fetchData(input: string, init?: RequestInit) {
-    const response = await fetch(`${API_BASE_URL}${input}`, {
+    const response = await fetch(`${process.env.REACT_APP_BACKEND_API}${input}`, {
         ...init,
-        credentials: 'include', // Include credentials like cookies
+        credentials: 'include',
     });
-    
+
     if (response.ok) {
         return response;
     } else {
         const errorBody = await response.json();
-        const errorMessage = errorBody.error;
+        const errorMessage = errorBody.error || 'An error occurred';
+        console.error(`Fetch error: ${errorMessage}`);
         throw new Error(errorMessage);
     }
 }
 
-// Fetch all locations
-export async function fetchLocations(): Promise<Location[]> {
-    const response = await fetchData("/locations", { method: "GET" });
+// Fetch all locations for a specific user
+export async function fetchLocations( accessToken: string) {
+    const response = await fetch(`${process.env.REACT_APP_BACKEND_API}/locations`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch locations');
+    }
     return response.json();
-}
+  }
 
 // Location input interface
 export interface LocationInput {
     address: string;
     latitude: number;
     longitude: number;
-    description?: string;
+    description?: string; // Optional field
 }
 
 // Create a new location
@@ -42,7 +49,7 @@ export async function createLocation(location: LocationInput): Promise<Location>
         },
         body: JSON.stringify(location),
     });
-    return response.json();
+    return response.json(); // Parse and return the created location
 }
 
 // Update an existing location
@@ -54,10 +61,10 @@ export async function updateLocation(locationId: string, location: LocationInput
         },
         body: JSON.stringify(location),
     });
-    return response.json();
+    return response.json(); // Parse and return the updated location
 }
 
 // Delete a location
 export async function deleteLocation(locationId: string) {
-    await fetchData(`/locations/${locationId}`, { method: "DELETE" });
+    await fetchData(`/locations/${locationId}`, { method: "DELETE" }); // Perform delete
 }
