@@ -15,7 +15,11 @@ At the heart of our room access system lies the verification component, which in
 Our solution is built entirely on Extrimian's ID Connect platform, ensuring compliance with W3C Verifiable Credentials standards. The platform's API manages the complexity of status checking and verification, allowing us to focus on creating an intuitive user experience. This integration provides a solid foundation for secure credential management while simplifying the technical architecture.
 
 [Issuance Details Section]
-This section will detail our implementation of the credential generation process, including how we encode room access parameters and bind credentials to specific guests.
+Our hotel room access system simplifies the issuance of Verifiable Credentials (VCs) upon a guest’s reservation confirmation, enabling seamless, secure access to hotel amenities. Each credential is unique, generated with a UUID to ensure distinct identification, and is structured as a “HotelRoomCredential,” which contains the guest’s Decentralized Identifier (DID), room information, stay dates, and access rights. Complying with W3C standards, the credential includes all data essential for room access and amenities, such as the gym or pool, while supporting visual customizations like the hotel’s logo to provide a polished, branded presentation for guests.
+
+The credential is cryptographically signed by the hotel’s issuer DID, ensuring authenticity and integrity, making it tamper-proof and easily verifiable. Following the data structuring and signing, our system sends a PUT request to Extrimian's ID Connect API for credential issuance, which generates an Out-of-Band (OOB) payload for seamless guest access via QR code. This OOB data is securely stored and readily available, allowing guests to access their digital room key with ease.
+
+Through this credential, the system provides a frictionless, secure check-in process, eliminating the need for physical room keys and enhancing guest convenience. This process not only strengthens security by reducing risks associated with lost keys but also aligns with the hotel’s commitment to delivering a modern, user-friendly digital experience.
 
 [Verification Details Section]
 This section will explain our verification process and how we've integrated it with the hotel's access control systems.
