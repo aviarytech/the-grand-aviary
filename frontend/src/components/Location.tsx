@@ -31,9 +31,9 @@ const Location = ({ location, onLocationClicked, onDeleteLocationClicked, classN
                             {address}
                         </Card.Title>
                         <Card.Text>
-                            <div><strong>Latitude:</strong> {latitude}</div>
-                            <div><strong>Longitude:</strong> {longitude}</div>
-                            <div><strong>Description:</strong> {description}</div>
+                            <div><strong>Room Number:</strong> {latitude}</div>
+                            <div><strong>Nights Stayed:</strong> {longitude}</div>
+                            <div><strong>Review:</strong> {description}</div>
                             <div className="text-muted">{createdUpdateText}</div>
                         </Card.Text>
                     </Col>

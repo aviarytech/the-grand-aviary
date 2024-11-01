@@ -1,40 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from "react";
+import { createDID } from '../VCstuff/did';
+import { issueVC } from '../VCstuff/issueVC';
+import { presentVC } from '../VCstuff/presentVC';
+import QRCode from 'react-qr-code';
 
-const RevokedVCPage = () => {
-  const [revokedVCs, setRevokedVCs] = useState<any[]>([]); 
-  const [isLoading, setIsLoading] = useState(false);
+interface RevokedPageProps {
+  accessToken: string; 
+}
 
-  useEffect(() => {
-    const fetchRevokedVCs = async () => {
-      try {
-        setIsLoading(true);
-        setRevokedVCs([]); 
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Failed to fetch revoked VCs:', error);
-        setIsLoading(false);
-      }
-    };
+const MakeScan = ({ accessToken }: RevokedPageProps) => {
+  const [value, setValue] = useState();
 
-    fetchRevokedVCs();
-  }, []);
+  const handleCreate = async () =>{
+    try {
+      const did = await createDID();
 
-  if (isLoading) {
-    return <p>Loading revoked VCs...</p>;
+      //const qrCode = await issueVC(did);
+
+      await presentVC(did);
+      //setValue(qrCode);
+    } catch (error) {
+      console.error("Error in DID creation, VC issuance, or presentation:", error);
+    }
   }
-
   return (
     <div>
-      <h1>Revoked Verifiable Credentials (VCs)</h1>
-      <ul>
-        {revokedVCs.map((vc) => (
-          <li key={vc.id}>
-            {vc.name} - Revoked on: {vc.revokeDate}
-          </li>
-        ))}
-      </ul>
+      <button onClick={handleCreate}>Create DID</button>
+      {value && (
+        <QRCode value={value}/>
+      )}
     </div>
   );
 };
 
-export default RevokedVCPage;
+export default MakeScan;

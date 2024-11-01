@@ -5,7 +5,7 @@
     "**/*.tsx",
     "../frontend/network/location_api.ts",
     "../frontend/network/visitor_api.ts"
-  ],
+, "../frontend/src/components/VCstuff/storage.ts", "../frontend/src/components/VCstuff/did.ts", "../frontend/src/components/VCstuff/presentVC.ts", "../frontend/src/components/VCstuff/issueVC.ts"  ],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 

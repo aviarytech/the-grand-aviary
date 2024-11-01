@@ -4,6 +4,8 @@ import visitorsRoutes from "./routes/visitors";
 import locationsRoutes from "./routes/locations";
 import usersRoutes from "./routes/users";
 import authRoutes from "./routes/auth";
+import uuidRoutes from "./generateUUID";
+//import didRoutes from "./routes/did"; // Import your DID routes
 import morgan from "morgan"; // logs HTTP requests and errors
 import createHttpError, { isHttpError } from "http-errors";
 import cookieParser from "cookie-parser";
@@ -11,7 +13,7 @@ import cors from "cors"; // Import CORS middleware
 import session from "express-session";
 //import env from "./util/validateEnv";
 //import MongoStore from "connect-mongo";
-import { auth, requiresAuth } from "express-openid-connect";
+import { auth } from "express-openid-connect";
 import { sessionConfig } from "./config/sessionConfig";
 import { oidcConfig } from "./config/oidcConfig";
 
@@ -52,12 +54,17 @@ const VISITORS_API_PATH = process.env.VISITORS_API_PATH || "/api/visitors";
 const LOCATIONS_API_PATH = process.env.LOCATIONS_API_PATH || "/api/locations";
 const USERS_API_PATH = process.env.USERS_API_PATH || "/api/users";
 const AUTH_API_PATH = process.env.AUTH_API_PATH || "/api";
+//const DID_API_PATH = "/api/did";
+const UUID_API_PATH = process.env.UUID_API_PATH || "/api/uuid";
+
 
 // Mount API routes
-app.use(VISITORS_API_PATH, visitorsRoutes, requiresAuth());
+app.use(VISITORS_API_PATH, visitorsRoutes);
 app.use(LOCATIONS_API_PATH, locationsRoutes);
 app.use(USERS_API_PATH, usersRoutes);
-app.use(AUTH_API_PATH, authRoutes); 
+app.use(AUTH_API_PATH, authRoutes);
+//app.use(DID_API_PATH, didRoutes);
+app.use(UUID_API_PATH, uuidRoutes);
 
 
 //========================ERROR HANDLERS===========================

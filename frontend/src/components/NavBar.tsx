@@ -18,7 +18,7 @@ const NavBar = ({ loggedInUser }: NavBarProps) => {
 
     // Function to handle the login logic
     const handleLogin = () => {
-        const returnTo = '/visitors'; // Set the return path after login
+        const returnTo = '/activeVC'; // Set the return path after login
         const encodedReturnTo = encodeURIComponent(`${process.env.REACT_APP_BASE_URL}${returnTo}`);
         const loginUrl = `${process.env.REACT_APP_BACKEND_API}/login?returnTo=${encodedReturnTo}`;
         // Redirect to the backend login page
@@ -35,23 +35,26 @@ const NavBar = ({ loggedInUser }: NavBarProps) => {
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link onClick={() => navigate("visitors")} className="nav-item">
+            {/* <Nav.Link onClick={() => navigate("visitors")} className="nav-item">
               <FaUserFriends className="me-2" /> Visitors
+            </Nav.Link> */}
+            <Nav.Link onClick={() => navigate("activeVC")} className="nav-item">
+              <FaKey className="me-2" /> IssueVC
             </Nav.Link>
-            <Nav.Link onClick={() => navigate("locations")} className="nav-item">
-              <FaMapMarkerAlt className="me-2" /> Locations
+            <Nav.Link onClick={() => navigate("rooms")} className="nav-item">
+              <FaMapMarkerAlt className="me-2" /> Rooms
             </Nav.Link>
-            <NavDropdown title="VC's" id="collapsible-nav-dropdown" className="nav-item">
+            {/* <NavDropdown title="VC's" id="collapsible-nav-dropdown" className="nav-item">
               <NavDropdown.Item onClick={() => navigate("activeVC")}>
                 <FaKey className="me-2" /> Active
               </NavDropdown.Item>
               <NavDropdown.Item onClick={() => navigate("revokedVC")}>
                 <FaKey className="me-2" /> Revoked
               </NavDropdown.Item>
-            </NavDropdown>
-            <Nav.Link onClick={() => navigate("settings")} className="nav-item">
+            </NavDropdown> */}
+            {/* <Nav.Link onClick={() => navigate("settings")} className="nav-item">
               <FaCogs className="me-2" /> Settings
-            </Nav.Link>
+            </Nav.Link> */}
           </Nav>
           <Nav>
             {loggedInUser ? (

@@ -33,7 +33,6 @@ const AddLocationDialog = ({locationToEdit, onDismiss, onLocationSaved}: AddEdit
             onLocationSaved(locationResponse);
         } catch (error) {
             console.error(error);
-            // You could show a user-friendly error message here
             alert("An error occurred while saving the location. Please try again.");
         }
     }
@@ -48,12 +47,12 @@ const AddLocationDialog = ({locationToEdit, onDismiss, onLocationSaved}: AddEdit
             <Modal.Body>
                 <Form id="addEditLocationForm" onSubmit={handleSubmit(onSubmit)}>
                     <Form.Group className="mb-3">
-                        <Form.Label>Address</Form.Label>
+                        <Form.Label>Visitor Name</Form.Label>
                         <Form.Control
                             type="text"
-                            placeholder="Address"
+                            placeholder="Jane Smith"
                             isInvalid={!!errors.address}
-                            {...register("address", { required: "Address is required"})}
+                            {...register("address", { required: "Name is required"})}
                         />
                         <Form.Control.Feedback type="invalid">
                             {errors.address?.message}
@@ -61,25 +60,25 @@ const AddLocationDialog = ({locationToEdit, onDismiss, onLocationSaved}: AddEdit
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Latitude</Form.Label>
+                        <Form.Label>Room Number</Form.Label>
                         <Form.Control
                             type="text"
-                            placeholder="Latitude"
+                            placeholder="Room Number"
                             isInvalid={!!errors.latitude}
-                            {...register("latitude", { required: "Latitude is required"})}
+                            {...register("latitude", { required: "Room Number is required"})}
                         />
                         <Form.Control.Feedback type="invalid">
                             {errors.latitude?.message}
                         </Form.Control.Feedback>
                     </Form.Group>
 
-                    <Form.Group className="mb-3">
-                        <Form.Label>Longitude</Form.Label>
+                    {/* <Form.Group className="mb-3">
+                        <Form.Label>Nights stayed</Form.Label>
                         <Form.Control
                             type="text"
-                            placeholder="Longitude"
+                            placeholder="Nights stayed"
                             isInvalid={!!errors.longitude}
-                            {...register("longitude", { required: "Longitude is required"})}
+                            {...register("longitude", { required: "Nights stayed is required"})}
                         />
                         <Form.Control.Feedback type="invalid">
                             {errors.longitude?.message}
@@ -87,14 +86,14 @@ const AddLocationDialog = ({locationToEdit, onDismiss, onLocationSaved}: AddEdit
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Description</Form.Label>
+                        <Form.Label>Review</Form.Label>
                         <Form.Control
                             as="textarea"
                             rows={5}
-                            placeholder="Description"
+                            placeholder="Reviews"
                             {...register("description")}
                         />
-                    </Form.Group>
+                    </Form.Group> */}
 
                     <Button
                         type="submit"

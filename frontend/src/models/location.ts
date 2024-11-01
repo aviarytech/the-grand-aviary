@@ -5,7 +5,7 @@ export interface Location {
     latitude: number;
     longitude: number;
     description?: string;
-    createdBy: string;  // OIDC user ID
+    createdBy: string; 
     createdAt: string;
     updatedAt: string;
 }

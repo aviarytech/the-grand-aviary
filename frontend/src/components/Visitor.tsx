@@ -42,7 +42,7 @@ const Visitor = ({
             className={`${styles.deleteIcon} text-muted ms-auto`}
             onClick={(e) => {
               onDeleteVisitorClicked(visitor);
-              e.stopPropagation(); // Prevent triggering onVisitorClicked
+              e.stopPropagation();
             }}
           />
         </Card.Title>

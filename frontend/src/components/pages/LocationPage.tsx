@@ -7,7 +7,13 @@ import * as LocationsApi from "../../network/location_api"; // Your API function
 import { Location as LocationModel } from '../../models/location';
 import styles from "../../styles/LocationsPage.module.css";
 
-const LocationsPage = ({ locations: initialLocations }: { locations: LocationModel[] }) => {
+
+interface LocationsPageProps {
+  locations: LocationModel[];
+  accessToken: string;  // Add accessToken as a prop
+}
+
+const LocationsPage = ({ locations: initialLocations, accessToken}: LocationsPageProps) => {
   const [locations, setLocations] = useState<LocationModel[]>(initialLocations);
   const [showLocationsLoadingError, setShowLocationsLoadingError] = useState(false);
   const [showAddLocationDialog, setShowAddLocationDialog] = useState(false);
@@ -43,7 +49,7 @@ const LocationsPage = ({ locations: initialLocations }: { locations: LocationMod
 
   return (
     <Container className={styles.locationsPage}>
-      <h1>Locations</h1>
+      <h1>Rooms</h1>
       {/* Error State */}
       {showLocationsLoadingError && <p>Something went wrong. Please refresh the page.</p>}
       
@@ -60,16 +66,16 @@ const LocationsPage = ({ locations: initialLocations }: { locations: LocationMod
             </li>
           ))}
         </ul>
-      ) : <p>No locations available.</p>}
+      ) : <p>No rooms added.</p>}
 
       {/* Button to Add New Location */}
-      <Button
+      {/* <Button
         className="mb-4"
         onClick={() => setShowAddLocationDialog(true)}
       >
         <FaPlus />
-        Add New Location
-      </Button>
+        Add New Room
+      </Button> */}
 
       {/* Dialog for Adding or Editing Location */}
       {showAddLocationDialog && (

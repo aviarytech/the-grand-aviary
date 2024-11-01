@@ -64,6 +64,17 @@ export async function updateVisitor(visitorId: string, visitor: VisitorInput): P
 }
 
 // Delete a visitor
-export async function deleteVisitor(visitorId: string) {
-    await fetchData(`/visitors/${visitorId}`, { method: "DELETE" }); // Perform delete
-}
+export const deleteVisitor = async (visitorId: string, accessToken: string) => {
+    const response = await fetch(`/visitors/${visitorId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json', // Optional, but good practice
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error deleting visitor: ${response.statusText}`);
+    }
+
+    return await response.json(); // Optional: return response if needed
+};

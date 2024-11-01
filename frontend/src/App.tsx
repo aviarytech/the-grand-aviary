@@ -13,7 +13,6 @@ import * as VisitorsApi from './network/visitor_api';
 import * as LocationsApi from './network/location_api';
 import { Visitor } from './models/visitor';
 import { Location } from './models/location';
-//import jwt from 'jsonwebtoken';
 
 // OIDC configuration
 const userManager = new UserManager({
@@ -109,11 +108,20 @@ function App() {
       <Routes>
         {loggedInUser ? (
           <>
-            <Route path="/" element={<VisitorsPage visitors={visitors} />} />
-            <Route path="/visitors" element={<VisitorsPage visitors={visitors} />} />
-            <Route path="/locations" element={<LocationsPage locations={locations} />} />
-            <Route path="/activeVC" element={<ActiveVCPage />} />
-            <Route path="/revokedVC" element={<RevokedVCPage />} />
+            <Route 
+              path="/" 
+              element={<VisitorsPage visitors={visitors} accessToken={accessToken || ' '} />} // Fixed passing accessToken here
+            />
+            <Route 
+              path="/visitors" 
+              element={<VisitorsPage visitors={visitors} accessToken={accessToken|| ' '} />} // Same fix here
+            />
+            <Route 
+              path="/rooms" 
+              element={<LocationsPage locations={locations} accessToken={accessToken || ' '} />} // Pass accessToken if needed
+            />
+            <Route path="/activeVC" element={<ActiveVCPage accessToken={accessToken || ' '}/>} />
+            <Route path="/revokedVC" element={<RevokedVCPage accessToken={accessToken || ' '} />} />
           </>
         ) : (
           <>

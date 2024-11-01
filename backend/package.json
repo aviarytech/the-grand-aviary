@@ -35,6 +35,12 @@
     "typescript-eslint": "^8.8.0"
   },
   "dependencies": {
+    "@extrimian/did-core": "^1.0.8",
+    "@extrimian/did-registry": "^1.6.0",
+    "@extrimian/did-resolver": "^1.4.4",
+    "@extrimian/kms-client": "^1.4.0-0",
+    "@extrimian/kms-core": "^1.4.0-2",
+    "@extrimian/vc-core": "^1.0.7",
     "@types/dotenv": "^6.1.1",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
