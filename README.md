@@ -20,5 +20,6 @@ The credential is cryptographically signed by the hotel’s issuer DID, ensuring
 
 Through this credential, the system provides a frictionless, secure check-in process, eliminating the need for physical room keys and enhancing guest convenience. This process not only strengthens security by reducing risks associated with lost keys but also aligns with the hotel’s commitment to delivering a modern, user-friendly digital experience.
 
-[Verification Details Section]
-This section will explain our verification process and how we've integrated it with the hotel's access control systems.
+With the VC on the Holder's QuarkID wallet, the user is able to access their allowed room(s) and hotel facilities. The protocol for unlocking is a simple process of trigging the display of a unique QR code, scanning the QR code with the QuarkID app, and after verification, the lock will automatically unlock. Each lock has it's own unique DID, so the holder can rest assured only they have sole access to their private rooms.
+
+The lock utilizes a button to trigger the unlocking sequence. When pressed, a PUT request is called to ID Connect with the lock's unique DID, which then returns a unique response. With the response, the lock's microcontroller generates a QR code and displays it on a small OLED screen. When the Holder scans the QR code and is verified, ID Connect notifies the lock that the Holder possesses the correct VC. The microcontroller then turns a motor which in effect unlocks the door. For security reasons, the lock relocks after 5 seconds.
